@@ -1,0 +1,109 @@
+---
+title: "p8105_hw3_ag3911"
+output: github_document
+---
+
+#Problem 1
+
+##Read and clean BRFSS data
+* format to use appropriate variable names
+* focus on "overall health" topic
+* include only responses from "excellent"" to "poor"
+* organize responses as a factor levels from "excellent" to "poor"
+```{r}
+install.packages("devtools", force = TRUE)
+devtools::install_github("p8105/p8105.datasets")
+
+library(p8105.datasets)
+library(tidyverse)
+brfss <- brfss_smart2010 %>%
+  janitor::clean_names()
+```
+
+##Q1: In 2002, which states were observed at 7 locations?
+
+```{r}
+```
+
+##Q2: Make a “spaghetti plot” that shows the number of observations in each state from 2002 to 2010.
+
+```{r}
+```
+
+##Q3: Make a table showing, for the years 2002, 2006, and 2010, the mean and standard deviation of the proportion of “Excellent” responses across locations in NY State.
+
+```{r}
+```
+
+##Q4: For each year and state, compute the average proportion in each response category (taking the average across locations in a state). 
+
+```{r}
+```
+
+##Q5: Make a five-panel plot that shows, for each response category separately, the distribution of these state-level averages over time.
+
+```{r}
+```
+
+#Problem 2
+
+##Read and clean Instacart data
+```{r}
+#install.packages("devtools", force = TRUE)
+devtools::install_github("p8105/p8105.datasets")
+
+library(p8105.datasets)
+library(tidyverse)
+
+instacart %>%
+  janitor::clean_names()
+```
+
+##Write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following questions (commenting on the results of each):
+
+
+
+##Q1: How many aisles are there, and which aisles are the most items ordered from?
+
+```{r}
+```
+
+##Q2: Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
+
+```{r}
+```
+
+##Q3: Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
+```{r}
+```
+
+##Q4: Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+
+
+#Problem 3
+
+##Read and Clean New York NOAA data 
+*Create separate variables for year, month, and day. 
+*Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. 
+*For snowfall, what are the most commonly observed values? Why?
+```{r}
+#install.packages("devtools", force = TRUE)
+devtools::install_github("p8105/p8105.datasets")
+
+library(p8105.datasets)
+library(tidyverse)
+
+ny_noaa %>% 
+  janitor::clean_names()
+```
+
+##write a short description of the dataset, noting the size and structure of the data, describing some key variables, and indicating the extent to which missing data is an issue. Then, do or answer the following questions (commenting on the results of each):
+
+##Q1: Make a two-panel plot showing the average temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+```{r}
+```
+
+##Q2: Make a two-panel plot showing the average temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+```{r}
+```
+
