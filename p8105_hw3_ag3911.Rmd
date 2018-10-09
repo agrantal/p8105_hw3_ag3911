@@ -49,7 +49,7 @@ brfss_plot = brfss %>%
   distinct(year, state, county) %>%      #to keep only unique/distinct rows 
   group_by(year, state) %>%
   summarize(number = n())
-ggplot(data = brfss_plot, aes(x = year, y = number, color = state)) + geom_line()
+ggplot(data = brfss_plot, aes(x = year, y = number, color = state)) + geom_line() 
 
 #still need to add a graph title 
 ```
@@ -85,7 +85,13 @@ brfss_avg
 ##Q5: Make a five-panel plot that shows, for each response category separately, the distribution of these state-level averages over time.
 
 ```{r}
-
+brfss %>%
+  #select(year, state, `Overall Health Response`) %>% 
+  group_by(year, state, `Overall Health Response`) %>%
+  summarize(mean = mean(`Overall Health Value`)) %>%
+  ggplot(aes(x = year, y = mean, color = state)) +
+  geom_line() + 
+  facet_grid(~`Overall Health Response`)
 ```
 
 #Problem 2
