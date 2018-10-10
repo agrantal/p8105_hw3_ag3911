@@ -148,11 +148,24 @@ cart_bake_dog_vegf = instacart %>%
   filter(aisle == 'baking ingredients' | aisle == 'dog food care' | aisle == 'packaged vegetables fruits') %>%
   select(product_name, aisle) %>% 
   group_by(aisle) %>%
-  summarise(n_product = n_distinct(product_name))
-
-  summarize(max = max(), na.rm = FALSE) 
+  filter(min_rank(desc(product_name)) < 2)
+cart_bake_dog_vegf
+#how do I get it to not repeat but only keep one observation per aisle? 
+```
 
 ##Q4: Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+```{r}
+apple_icecream = instacart %>%
+  filter(product_name == 'Pink Lady Apples' | product_name == 'Coffee Ice Cream') %>%
+  mutate(order_dow = as.character(order_dow)) %>%
+  mutate(order_dow = recode(order_dow, `0` = "Sunday", `1` = "Monday", `2` = "Tuesday", `3` ="Wednesday", `4` = "Thursday", `5` = "Friday", `6` = "Saturday")) %>%
+  group_by(product_name, order_dow) %>%
+  #recode(order_dow, `0` = "Sunday", 1 = "Monday", 2 = "Tuesday", 3 ="Wednesday", 4 = "Thursday", 5 = "Friday", 6 = "Saturday") %>% 
+  summarise(mean_hr = mean(order_hour_of_day)) %>%
+  
+#how to round the mean outputs? 
+
+```
 
 
 #Problem 3
