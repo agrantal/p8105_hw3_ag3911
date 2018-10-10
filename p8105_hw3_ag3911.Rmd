@@ -104,27 +104,53 @@ devtools::install_github("p8105/p8105.datasets")
 library(p8105.datasets)
 library(tidyverse)
 
-instacart %>%
-  janitor::clean_names()
+instacart = instacart %>%
+  janitor::clean_names() %>%
+  filter(aisle != 'missing')
 ```
-
-##Write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following questions (commenting on the results of each):
-
-
+The size of the dataset is `r dim(instacart)`. It contains information about orders, products ordered, and customers. Order information includes the order ID number, the order in which each product was added to the online shopping cart, whether or not reordering in the cart occurred, the day of the week and hour of the day it was placed. For example, an order placed on day of the week 5 at hour 17 means that it was placed on Friday at 5 pm. Product information includes the product ID number, product name, the name of the aisle in which its found, and the ID number for and name of the department in which it's found. For example, the dairy eggs department has ID number 16.  Customer information includes the customer ID number, their order sequence number, and the number of days since their last order. 
 
 ##Q1: How many aisles are there, and which aisles are the most items ordered from?
 
 ```{r}
+instacart %>%
+    group_by(aisle_id) %>%
+    summarise(n = n())
+#to double check, count aisles using name instead of id. should get the same number of aisles
+instacart %>%      
+    group_by(aisle) %>%
+    summarize(n = n())
 ```
+There are 133 aisles. 
+
+```{r}
+#to find from which aisles the most items are ordered
+cart = instacart %>%
+    group_by(aisle) %>%
+    summarize(number = n_distinct(product_id)) %>%
+    filter(min_rank(desc(number)) < 4)
+```
+The most items are ordered from 1) the "candy chocolate" aisle followed by 2) the "yogurt" aisle followed by 3) the "ice cream ice" aisle.  
 
 ##Q2: Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
 
 ```{r}
+instacart %>%
+    group_by(aisle) %>%
+    summarize(number = n_distinct(product_id)) %>%
+    #filter(rank(desc(number))) %>%
+    ggplot(aes(x = aisle , y = number))
 ```
 
-##Q3: Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
+##Q3: Make a table showing the most popular item in aisles “baking ingredients”, in “dog food care”, and in “packaged vegetables fruits”
 ```{r}
-```
+cart_bake_dog_vegf = instacart %>%
+  filter(aisle == 'baking ingredients' | aisle == 'dog food care' | aisle == 'packaged vegetables fruits') %>%
+  select(product_name, aisle) %>% 
+  group_by(aisle) %>%
+  summarise(n_product = n_distinct(product_name))
+
+  summarize(max = max(), na.rm = FALSE) 
 
 ##Q4: Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
