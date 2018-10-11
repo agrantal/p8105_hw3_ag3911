@@ -45,13 +45,14 @@ In 2002, Connecticut, Florida, and North Carolina were observed at 7 county loca
 ##Q2: Make a “spaghetti plot” that shows the number of observations in each state from 2002 to 2010.
 
 ```{r}
+library(ggplot2)
+library(patchwork)
+
 brfss_plot = brfss %>%
   distinct(year, state, county) %>%      #to keep only unique/distinct rows 
   group_by(year, state) %>%
   summarize(number = n())
-ggplot(data = brfss_plot, aes(x = year, y = number, color = state)) + geom_line() 
-
-#still need to add a graph title 
+ggplot(data = brfss_plot, aes(x = year, y = number, color = state))+ geom_line() + labs(title = "Observations by State, 2002-2010")
 ```
 
 
@@ -87,11 +88,14 @@ brfss_avg
 ```{r}
 brfss %>%
   #select(year, state, `Overall Health Response`) %>% 
+  mutate(year = as.factor(year)) %>%
   group_by(year, state, `Overall Health Response`) %>%
   summarize(mean = mean(`Overall Health Value`)) %>%
-  ggplot(aes(x = year, y = mean, color = state)) +
-  geom_line() + 
-  facet_grid(~`Overall Health Response`)
+  ggplot(aes(x = year, y = mean)) +
+  geom_boxplot() + 
+  facet_grid(~`Overall Health Response`) + theme(axis.text.x = element_text(angle = 90))
+#reorder columns to go from excellent to poor
+#Getting ERROR: "Continuous x aesthetic -- did you forget aes(group=...)? Removed 21 rows containing non-finite values (stat_boxplot)."
 ```
 
 #Problem 2
@@ -105,8 +109,7 @@ library(p8105.datasets)
 library(tidyverse)
 
 instacart = instacart %>%
-  janitor::clean_names() %>%
-  filter(aisle != 'missing')
+  janitor::clean_names() 
 ```
 The size of the dataset is `r dim(instacart)`. It contains information about orders, products ordered, and customers. Order information includes the order ID number, the order in which each product was added to the online shopping cart, whether or not reordering in the cart occurred, the day of the week and hour of the day it was placed. For example, an order placed on day of the week 5 at hour 17 means that it was placed on Friday at 5 pm. Product information includes the product ID number, product name, the name of the aisle in which its found, and the ID number for and name of the department in which it's found. For example, the dairy eggs department has ID number 16.  Customer information includes the customer ID number, their order sequence number, and the number of days since their last order. 
 
@@ -121,25 +124,27 @@ instacart %>%
     group_by(aisle) %>%
     summarize(n = n())
 ```
-There are 133 aisles. 
+There are 134 aisles. 
 
 ```{r}
 #to find from which aisles the most items are ordered
 cart = instacart %>%
     group_by(aisle) %>%
-    summarize(number = n_distinct(product_id)) %>%
-    filter(min_rank(desc(number)) < 4)
+    summarize(n = n()) %>%
+    filter(min_rank(desc(n)) < 4)
 ```
-The most items are ordered from 1) the "candy chocolate" aisle followed by 2) the "yogurt" aisle followed by 3) the "ice cream ice" aisle.  
+The most items are ordered from 1) the "fresh vegetables" aisle followed by 2) the "fresh fruits" aisle followed by 3) the "packaged vegetables fruits" aisle.  
 
 ##Q2: Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
 
 ```{r}
 instacart %>%
-    group_by(aisle) %>%
-    summarize(number = n_distinct(product_id)) %>%
-    #filter(rank(desc(number))) %>%
-    ggplot(aes(x = aisle , y = number))
+  group_by(aisle) %>%
+  summarize(n = n()) %>%
+  ggplot(aes(x = aisle , y = n, color = aisle)) + geom_point() + theme(axis.text.x = element_text(angle = 90, size = 5))
+    
+#try to make a barplot work
+#use min_rank(desc(number)) function to reorder x-axis variables from highest to lowest obs then use reorder function
 ```
 
 ##Q3: Make a table showing the most popular item in aisles “baking ingredients”, in “dog food care”, and in “packaged vegetables fruits”
@@ -147,24 +152,30 @@ instacart %>%
 cart_bake_dog_vegf = instacart %>%
   filter(aisle == 'baking ingredients' | aisle == 'dog food care' | aisle == 'packaged vegetables fruits') %>%
   select(product_name, aisle) %>% 
-  group_by(aisle) %>%
-  filter(min_rank(desc(product_name)) < 2)
+  group_by(aisle, product_name) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n)) #to sort from highest to lowest the #(n) of each product within aisles
 cart_bake_dog_vegf
-#how do I get it to not repeat but only keep one observation per aisle? 
+#to collapse repeat aisles and only show the top 1
+top = cart_bake_dog_vegf %>%
+    group_by(aisle) %>%
+    top_n(1)
+top 
 ```
+
 
 ##Q4: Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 ```{r}
 apple_icecream = instacart %>%
   filter(product_name == 'Pink Lady Apples' | product_name == 'Coffee Ice Cream') %>%
   mutate(order_dow = as.character(order_dow)) %>%
-  mutate(order_dow = recode(order_dow, `0` = "Sunday", `1` = "Monday", `2` = "Tuesday", `3` ="Wednesday", `4` = "Thursday", `5` = "Friday", `6` = "Saturday")) %>%
-  group_by(product_name, order_dow) %>%
+  mutate(order_dow = recode(order_dow, `0` = "0:Sunday", `1` = "1:Monday", `2` = "2:Tuesday", `3` ="3:Wednesday", `4` = "4:Thursday", `5` = "5:Friday", `6` = "6:Saturday")) %>%
+  group_by(order_dow, product_name) %>%
   #recode(order_dow, `0` = "Sunday", 1 = "Monday", 2 = "Tuesday", 3 ="Wednesday", 4 = "Thursday", 5 = "Friday", 6 = "Saturday") %>% 
   summarise(mean_hr = mean(order_hour_of_day)) %>%
-  
-#how to round the mean outputs? 
-
+  spread(key = order_dow, value = mean_hr) %>%
+  knitr::kable(digits = 1)
+apple_icecream
 ```
 
 
@@ -175,25 +186,66 @@ apple_icecream = instacart %>%
 *Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. 
 *For snowfall, what are the most commonly observed values? Why?
 ```{r}
-#install.packages("devtools", force = TRUE)
+install.packages("devtools", force = TRUE)
 devtools::install_github("p8105/p8105.datasets")
 
 library(p8105.datasets)
 library(tidyverse)
 
-ny_noaa %>% 
-  janitor::clean_names()
+clean_ny_noaa = ny_noaa %>%
+  janitor::clean_names() %>%
+  na.omit() %>%
+  separate(date, into = c("year", "month", "day"), sep = "-") %>%
+  mutate(tmin = as.numeric(tmin)) %>%
+  mutate(tmax = as.numeric(tmax)) 
+
+snow = clean_ny_noaa %>%
+  group_by(snow) %>%  
+  summarise(n = n()) %>%
+  top_n(1)              #the most commonly observed value is 0 (mm of snow). 
 ```
-
-##write a short description of the dataset, noting the size and structure of the data, describing some key variables, and indicating the extent to which missing data is an issue. Then, do or answer the following questions (commenting on the results of each):
-
+The New York NOAA dataset contains weather station ID, date of observation, and observations of precipitation, snowfall, snow depth, maximum temperature, and minimum temperature. Its dimensions are `r dim(ny_noaa)`. There is a lot of missing data, especially for temperature. For snowfall, the most commonly observed value is zero because for the majority of the year the conditions are not right for snow to fall.  
 
 
-##Q1: Make a two-panel plot showing the average temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+##Q1: Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 ```{r}
+#to clean the dataset according to the specifications of Q1
+jan_july = clean_ny_noaa %>%
+    select(year, month, id, tmin, tmax) %>%
+    filter(month == '01' | month == '07') %>%
+    mutate(year = as.factor(year)) %>%
+    group_by(year, month, id) %>% 
+    summarize(month_mean = mean(tmax)) %>%
+    ggplot(aes(x = year, y = month_mean)) + geom_boxplot() + facet_grid(.~ month) + theme(axis.text.x = element_text(angle = 90))
+jan_july
+
+# add titles 
 ```
 
-##Q2: Make a two-panel plot showing the average temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+##Q2: Make a two-panel plot with two plots:
+Plot 1: tmax vs tmin for the full dataset -- use geomhex 
 ```{r}
+library(ggplot2)
+min_max = clean_ny_noaa %>%
+    select(tmin, tmax) 
+min_max_plot = ggplot(min_max, aes(x = tmin, y = tmax)) + geom_hex()
+min_max_plot 
+
+#Getting error: "Computation failed in `stat_binhex()`: Package `hexbin` required for `stat_binhex`. Please install and try again."
 ```
 
+Plot 2: The distribution of snowfall values greater than 0 and less than 100 separately by year. Boxplot per year 
+```{r}
+snowfall = clean_ny_noaa %>%
+    select(year, snow) %>%
+    filter(snow < 100, snow > 0) 
+    
+snowfall_plot = ggplot(snowfall, aes(x = year, y = snow)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 90))
+snowfall_plot
+
+```
+```{r}
+#stitch the two plots together 
+library(patchwork)
+min_max_plot + snowfall_plot
+```
