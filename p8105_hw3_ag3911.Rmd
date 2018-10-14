@@ -25,10 +25,6 @@ brfss <- brfss_smart2010 %>%
   rename("Overall Health Value" = data_value) %>%
   separate(locationdesc, into = c("state", "county"), sep = " - ") %>% 
   mutate(`Overall Health Response` = as.factor(`Overall Health Response`)) 
-
-#do i need to do the following to change the factor levels from words to numbers? 
-  #OH_fac = gl(1, 2, 3, 4, 5) %>%
-  #levels(OH_fac) = c("Poor", "Fair", "Good", "Very Good", "Excellent")
 ```
 
 ##Q1: In 2002, which states were observed at 7 locations?
@@ -112,7 +108,7 @@ library(tidyverse)
 instacart = instacart %>%
   janitor::clean_names() 
 ```
-The size of the dataset is `r dim(instacart)`. It contains information about orders, products ordered, and customers. Order information includes the order ID number, the order in which each product was added to the online shopping cart, whether or not reordering in the cart occurred, the day of the week and hour of the day it was placed. For example, an order placed on day of the week 5 at hour 17 means that it was placed on Friday at 5 pm. Product information includes the product ID number, product name, the name of the aisle in which its found, and the ID number for and name of the department in which it's found. For example, the dairy eggs department has ID number 16.  Customer information includes the customer ID number, their order sequence number, and the number of days since their last order. 
+The size of the dataset is `r dim(instacart)`. It contains information about orders, products ordered, and customers. Order information includes the order ID number, the order in which each product was added to the online shopping cart, whether or not reordering in the cart occurred, the day of the week and hour of the day it was placed. For example, an order placed on day of the week 5 at hour 17 means that it was placed on Friday at 5 pm. Product information includes the product ID number, product name, the name of the aisle in which it is found, and the ID number for and name of the department in which it is found. For example, the dairy eggs department has ID number 16.  Customer information includes the customer ID number, their order sequence number, and the number of days since their last order. 
 
 ##Q1: How many aisles are there, and which aisles are the most items ordered from?
 
@@ -120,10 +116,10 @@ The size of the dataset is `r dim(instacart)`. It contains information about ord
 instacart %>%
     group_by(aisle_id) %>%
     summarise(n = n())
-#to double check, count aisles using name instead of id. should get the same number of aisles
-instacart %>%      
-    group_by(aisle) %>%
-    summarize(n = n())
+#to double check, use the code below to count aisles using name instead of id. should get the same number of aisles
+#instacart %>%      
+    #group_by(aisle) %>%
+    #summarize(n = n())
 ```
 There are 134 aisles. 
 
@@ -133,6 +129,7 @@ cart = instacart %>%
     group_by(aisle) %>%
     summarize(n = n()) %>%
     filter(min_rank(desc(n)) < 4)
+cart
 ```
 The most items are ordered from 1) the "fresh vegetables" aisle followed by 2) the "fresh fruits" aisle followed by 3) the "packaged vegetables fruits" aisle.  
 
@@ -141,11 +138,8 @@ The most items are ordered from 1) the "fresh vegetables" aisle followed by 2) t
 ```{r}
 instacart %>%
   group_by(aisle) %>%
-  summarize(n = n()) %>%
-  ggplot(aes(x = aisle , y = n, color = aisle)) + geom_point() + theme(axis.text.x = element_text(angle = 90, size = 5))
-    
-#try to make a barplot work
-#use min_rank(desc(number)) function to reorder x-axis variables from highest to lowest obs then use reorder function
+  summarize(number = n()) %>%
+  ggplot(aes(x = reorder(aisle, -number), y = number)) + geom_point() + theme(axis.text.x = element_text(angle = 90, size = 5)) + labs(title = "Number of Items Ordered in Each Aisle") + labs(x = "Aisle Name", y = "Number of Items")
 ```
 
 ##Q3: Make a table showing the most popular item in aisles “baking ingredients”, in “dog food care”, and in “packaged vegetables fruits”
