@@ -192,14 +192,17 @@ clean_ny_noaa = ny_noaa %>%
   na.omit() %>%
   separate(date, into = c("year", "month", "day"), sep = "-") %>%
   mutate(tmin = as.numeric(tmin)) %>%
-  mutate(tmax = as.numeric(tmax)) 
+  mutate(tmax = as.numeric(tmax)) %>%
+  mutate(tmax = tmax/10) %>%    # to convert max temp unit from a tenth of a degree to a degree
+  mutate(tmin = tmin/10)        # to convert min temp unit from a tenth of a degree to a degree
 
 snow = clean_ny_noaa %>%
   group_by(snow) %>%  
   summarise(n = n()) %>%
   top_n(1)              #the most commonly observed value is 0 (mm of snow). 
+snow
 ```
-The New York NOAA dataset contains weather station ID, date of observation, and observations of precipitation, snowfall, snow depth, maximum temperature, and minimum temperature. Its dimensions are `r dim(ny_noaa)`. There is a lot of missing data, especially for temperature. For snowfall, the most commonly observed value is zero because for the majority of the year the conditions are not right for snow to fall.  
+The New York NOAA dataset contains weather station ID, date of observation, and observations of precipitation, snowfall, snow depth, maximum temperature, and minimum temperature. Its dimensions are `r dim(ny_noaa)`. There is a lot of missing data, especially for temperature. For snowfall, the most commonly observed value is zero because for the majority of the year the conditions are not right for snow.  
 
 
 ##Q1: Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
@@ -211,36 +214,33 @@ jan_july = clean_ny_noaa %>%
     mutate(year = as.factor(year)) %>%
     group_by(year, month, id) %>% 
     summarize(month_mean = mean(tmax)) %>%
-    ggplot(aes(x = year, y = month_mean)) + geom_boxplot() + facet_grid(.~ month) + theme(axis.text.x = element_text(angle = 90))
+    ggplot(aes(x = year, y = month_mean)) + geom_boxplot() + facet_grid(.~ month) + theme(axis.text.x = element_text(angle = 90)) + labs(title = "Maximum Temperatures in January and July 1981-2010", y = "Average Maximum Temperature per Month (degrees Celsius)")
 jan_july
-
-# add titles 
 ```
+The average maximum temperatures are consistently higher across years in July than in January, which would be expected. For January, the median average maximum temperature per year ranges from 5 to -5 C and there are two significant outliers: -17 C in 1982 and -16 C in 1996. For July, the median average maximum temperature per year ranges from 24 to 29 C and there is one significant outlier, 15 C in 1988. 
 
-##Q2: Make a two-panel plot with two plots:
-Plot 1: tmax vs tmin for the full dataset -- use geomhex 
+
+##Q2: Make a two-panel plot with two plots.
+###Plot 1: tmax vs tmin for the full dataset. 
 ```{r}
 library(ggplot2)
-min_max = clean_ny_noaa %>%
-    select(tmin, tmax) 
-min_max_plot = ggplot(min_max, aes(x = tmin, y = tmax)) + geom_hex()
-min_max_plot 
-
-#Getting error: "Computation failed in `stat_binhex()`: Package `hexbin` required for `stat_binhex`. Please install and try again."
+library(hexbin)
+min_max_plot = clean_ny_noaa %>%
+    select(tmin, tmax) %>%
+    ggplot(aes(x = tmin, y = tmax)) + geom_hex() + labs(title = "Frequency of Minimum and Maximum Temperatures", x = "Minimum Temperature (degrees C)", y = "Maximum Temperature (degrees C)") 
+min_max_plot
 ```
 
-Plot 2: The distribution of snowfall values greater than 0 and less than 100 separately by year. Boxplot per year 
+###Plot 2: The distribution of snowfall values greater than 0 and less than 100 separately by year.
 ```{r}
-snowfall = clean_ny_noaa %>%
+snow_plot = clean_ny_noaa %>%
     select(year, snow) %>%
-    filter(snow < 100, snow > 0) 
-    
-snowfall_plot = ggplot(snowfall, aes(x = year, y = snow)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 90))
-snowfall_plot
-
+    filter(snow < 100, snow > 0) %>%
+    ggplot(aes(x = year, y = snow)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 90)) + labs(title = "Snowfall 1981-2010", y = "Snowfall (mm)")
+snow_plot
 ```
 ```{r}
 #stitch the two plots together 
 library(patchwork)
-min_max_plot + snowfall_plot
+min_max_plot + snow_plot
 ```
