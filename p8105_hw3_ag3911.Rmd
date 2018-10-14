@@ -93,9 +93,10 @@ brfss %>%
   summarize(mean = mean(`Overall Health Value`)) %>%
   ggplot(aes(x = year, y = mean)) +
   geom_boxplot() + 
-  facet_grid(~`Overall Health Response`) + theme(axis.text.x = element_text(angle = 90))
+  facet_grid(~`Overall Health Response`) + theme(axis.text.x = element_text(angle = 90)) + labs(title = "State-level Mean Proportion of Responses Over Time") 
+  
 #reorder columns to go from excellent to poor
-#Getting ERROR: "Continuous x aesthetic -- did you forget aes(group=...)? Removed 21 rows containing non-finite values (stat_boxplot)."
+
 ```
 
 #Problem 2
