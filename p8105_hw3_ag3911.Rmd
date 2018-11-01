@@ -51,6 +51,7 @@ brfss_plot = brfss %>%
   summarize(number = n())
 ggplot(data = brfss_plot, aes(x = year, y = number, color = state))+ geom_line() + labs(title = "Observations by State, 2002-2010")
 ```
+
 Florida fluctuates the most drastically with 7 observations in 2006, 44 in 2007, 4 in 2008, 8 in 2009 and then back up to 41 in 2010. Texas and New Jersey are examples of states that have fairly consistent increasing trends over time.  
 
 ## Q3: Make a table showing, for the years 2002, 2006, and 2010, the mean and standard deviation of the proportion of “Excellent” responses across locations in NY State.
@@ -93,6 +94,7 @@ brfss %>%
   geom_boxplot() + 
   facet_grid(~`Overall Health Response`) + theme(axis.text.x = element_text(angle = 90)) + labs(title = "State-level Mean Proportion of Responses Over Time") 
 ```
+
 The median of state-level averages within each response category remain fairly constant from 2002 to 2010. Across these years, the proportion of responses rank as follows: 1) very good, 2) good, 3) excellent, 4) fair, and 5) poor. 
 
 
@@ -142,6 +144,7 @@ instacart %>%
   summarize(number = n()) %>%
   ggplot(aes(x = reorder(aisle, -number), y = number)) + geom_point() + theme(axis.text.x = element_text(angle = 90, size = 5)) + labs(title = "Number of Items Ordered in Each Aisle") + labs(x = "Aisle Name", y = "Number of Items")
 ```
+
 This plot illustrates that the most ordered items are the "fresh vegetables" aisle followed closely by the "fresh fruits" aisle. Then there is a jump down to the "packaged vegetables fruits" aisle and another smaller jump down to the "yogurt" aisle. It also shows that the least ordered item is the "beauty" aisle. 
 
 
@@ -160,6 +163,7 @@ top = cart_bake_dog_vegf %>%
     top_n(1)
 top 
 ```
+
 The most popular item in the "packaged vegetables fruits" aisle is organic baby spinach. The most popular item in the "baking ingredients" aisle is light brown sugar. The most popular item in the "dog food care" aisle is snack sticks chicken and rice recipe dog treats. There are 19-times more organic baby spinach items sold than light brown sugar items and there are 16-times more light brown sugar items sold than snack sticks chicken and rice recipe dog treat items. 
 
 ## Q4: Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week.
@@ -175,6 +179,7 @@ apple_icecream = instacart %>%
   knitr::kable(digits = 1)
 apple_icecream
 ```
+
 The most coffee ice cream is sold on Tuesdays and the least is sold on Fridays. Maybe people are the most decaffeinated and in their feelings right before humpday. The most pink lady apples are sold on Wednesdays and the least are sold on Mondays. I don't know why this might be the case. 
 
 
@@ -221,6 +226,7 @@ jan_july = clean_ny_noaa %>%
     ggplot(aes(x = year, y = month_mean)) + geom_boxplot() + facet_grid(.~ month) + theme(axis.text.x = element_text(angle = 90)) + labs(title = "Maximum Temperatures in January and July 1981-2010", y = "Average Maximum Temperature per Month (degrees Celsius)")
 jan_july
 ```
+
 The average maximum temperatures are consistently higher across years in July than in January, which would be expected. For January, the median average maximum temperature per year ranges from 5 to -5 C and there are two significant outliers: -17 C in 1982 and -16 C in 1996. For July, the median average maximum temperature per year ranges from 24 to 29 C and there is one significant outlier, 15 C in 1988. 
 
 
@@ -234,6 +240,7 @@ min_max_plot = clean_ny_noaa %>%
     ggplot(aes(x = tmin, y = tmax)) + geom_hex() + labs(title = "Frequency of Minimum and Maximum Temperatures", x = "Minimum Temperature (degrees C)", y = "Maximum Temperature (degrees C)") 
 min_max_plot
 ```
+
 The general trend is that higher minimum temperatures are associated with higher maximum temperatures. For example, for most years most stations recorded a minimum between 15 and 20 degrees C and a maximum between 25 and 30 degrees C. There are a few outliers that don't follow this trend. For example, one year a station recorded a minium of approximately -50 degrees C and a maximum of approximately 30 degrees C. 
 
 
@@ -245,6 +252,7 @@ snow_plot = clean_ny_noaa %>%
     ggplot(aes(x = year, y = snow)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 90)) + labs(title = "Snowfall 1981-2010", y = "Snowfall (mm)")
 snow_plot
 ```
+
 From 1981 to 2010, the median snowfall remains at 25 mm. There are some notable outliers, the majority of which are for snowfall depths of 85 to 100 mm.  
 
 
